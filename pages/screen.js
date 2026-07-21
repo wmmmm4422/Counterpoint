@@ -26,6 +26,16 @@ export default function ScreenPage({ projects, events }) {
 }
 
 export const getStaticProps = async (context) => {
+  if (!process.env.DATABASE_URL) {
+    return {
+      props: {
+        projects: [],
+        events: [],
+      },
+      revalidate: 60,
+    };
+  }
+
   try {
     const projectsData = await prisma.projects.findMany({
       include: {
@@ -47,7 +57,14 @@ export const getStaticProps = async (context) => {
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
+    return {
+      props: {
+        projects: [],
+        events: [],
+      },
+      revalidate: 60,
+    };
   }
 };
 

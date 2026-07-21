@@ -6,7 +6,6 @@ import dynamic from "next/dynamic";
 const Works = dynamic(() => import("containers/works"), { ssr: false });
 
 export default function WorksPage({ projectsData, connectionData }) {
-  console.log(projectsData, connectionData);
   return (
     <>
       <Head>
@@ -27,6 +26,19 @@ export default function WorksPage({ projectsData, connectionData }) {
 }
 
 export const getStaticProps = async (context) => {
+  if (!process.env.DATABASE_URL) {
+    return {
+      props: {
+        projectsData: [],
+        connectionData: {
+          nodes: [],
+          links: [],
+        },
+      },
+      revalidate: 60,
+    };
+  }
+
   try {
     const projectsData = await prisma.projects.findMany({
       include: {
@@ -46,7 +58,17 @@ export const getStaticProps = async (context) => {
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
+    return {
+      props: {
+        projectsData: [],
+        connectionData: {
+          nodes: [],
+          links: [],
+        },
+      },
+      revalidate: 60,
+    };
   }
 };
 

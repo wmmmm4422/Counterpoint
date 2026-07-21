@@ -25,6 +25,15 @@ export default function Home({ events }) {
 }
 
 export const getStaticProps = async (context) => {
+  if (!process.env.DATABASE_URL) {
+    return {
+      props: {
+        events: [],
+      },
+      revalidate: 60,
+    };
+  }
+
   try {
     const eventsData = await prisma.events.findMany();
 
@@ -34,6 +43,12 @@ export const getStaticProps = async (context) => {
       },
     };
   } catch (e) {
-    console.log(e);
+    console.error(e);
+    return {
+      props: {
+        events: [],
+      },
+      revalidate: 60,
+    };
   }
 };
